@@ -347,30 +347,177 @@
 -- limit 10;
 
 --15--
-with
-reqTable as
-(
-  select constructorid, statusid from 
-  results join races
-  on races.raceid = results.raceid and year >= 2000 and statusid = 5
-),
-res_cons as
-(
-  select constructorid, count(statusid) as num
-  from reqTable group by 
-  constructorid
-),
-ans as
-(
-  select constructorid, num 
-  from res_cons where num = (select max(num) from res_cons)
-)
-select constructors.constructorid, name, num
-from ans join constructors
-on ans.constructorid = constructors.constructorid
-order by name, constructorid
-;
+-- with
+-- reqTable as
+-- (
+--   select constructorid, statusid from 
+--   results join races
+--   on races.raceid = results.raceid and year >= 2000 and statusid = 5
+-- ),
+-- res_cons as
+-- (
+--   select constructorid, count(statusid) as num
+--   from reqTable group by 
+--   constructorid
+-- ),
+-- ans as
+-- (
+--   select constructorid, num 
+--   from res_cons where num = (select max(num) from res_cons)
+-- )
+-- select constructors.constructorid, name, num
+-- from ans join constructors
+-- on ans.constructorid = constructors.constructorid
+-- order by name, constructorid
+-- ;
 
 --16--
+-- with
+-- winners as
+-- (
+--   select * from results where positionorder = 1
+-- ),
+-- americanDrivers as
+-- (
+--   select driverid from drivers where nationality = 'American'
+-- ),
+-- americanCircuits as
+-- (
+--   select circuitid from circuits where country = 'USA'
+-- ),
+-- req_raceid as
+-- (
+--   select raceid from races where circuitid in (select circuitid from americanCircuits)
+-- ),
+-- sol as
+-- (
+--   select distinct driverid from winners 
+--   where driverid in (select driverid from americanDrivers)
+--   and raceid in (select raceid from req_raceid)
+-- )
+-- select drivers.driverid, forename, surname 
+-- from drivers join sol 
+-- on sol.driverid = drivers.driverid
+-- order by forename, surname, driverid
+-- limit 5
+-- ;
 
+--17--
+-- with
+-- races2014 as
+-- (
+--   select raceid from races where year>=2014
+-- ),
+-- oneTwo as
+-- (
+--   select raceid, constructorid, positionorder from results 
+--   where (positionorder = 1 or positionorder = 2) 
+--   and raceid in (select raceid from races2014)
+-- ),
+-- result as
+-- (
+--   select O1.raceid, O1.constructorid
+--   from oneTwo as O1, oneTwo as O2
+--   where O1.raceid = O2.raceid 
+--   and O1.positionorder = 1
+--   and O2.positionorder = 2
+--   and O1.constructorid = O2.constructorid
+-- ),
+-- resultFinal as
+-- (
+--   select constructorid, count(distinct raceid) as count
+--   from result
+--   group by constructorid
+-- )
+-- select constructors.constructorid, name, count
+-- from constructors join resultFinal
+-- on constructors.constructorid = resultFinal.constructorid
+-- order by count desc, name, constructors.constructorid
+-- limit 1;
 
+--18--
+-- with
+-- lapLeader as
+-- (
+--   select driverid from laptimes where position = 1
+-- ),
+-- lapLeaderNum as
+-- (
+--   select driverid, count(driverid) as num_laps
+--   from lapLeader
+--   group by driverid
+-- ),
+-- winner as
+-- (
+--   select driverid, num_laps from lapLeaderNum
+--   where num_laps = (select max(num_laps) from lapLeaderNum)
+-- )
+-- select drivers.driverid, forename, surname, num_laps
+-- from winner join drivers
+-- on drivers.driverid = winner.driverid
+-- order by forename, surname, driverid
+-- ;
+
+--19--
+-- with
+-- podiums as
+-- (
+--   select distinct raceid, driverid from 
+--   results where 
+--   (positionorder = 1 or positionorder = 2 or positionorder = 3)
+-- ),
+-- podiumCounts as
+-- (
+--   select driverid, count(raceid) as count
+--   from podiums group by 
+--   driverid
+-- ),
+-- details as
+-- (
+--   select drivers.driverid, forename, surname, count
+--   from podiumCounts join drivers
+--   on podiumCounts.driverid = drivers.driverid
+-- )
+-- select driverid, forename, surname, count
+-- from details 
+-- where count = (select max(count) from details)
+-- order by forename, surname desc, driverid
+-- ;
+
+--20--
+with
+winner_year as
+(
+  select results.raceid, points, driverid, year
+  from races join results
+  on results.raceid = races.raceid
+),
+yearTotalPoints as
+(
+  select year , driverid, sum(points) as points
+  from winner_year 
+  group by year , driverid
+),
+championscore as
+(
+  select distinct year, max(points) as points
+  from yearTotalPoints
+  group by year
+),
+champions as
+(
+  select distinct yearTotalPoints.year, driverid
+  from yearTotalPoints join championscore
+  on yearTotalPoints.year = championscore.year and yearTotalPoints.points = championscore.points
+),
+championsCount as
+(
+  select driverid, count(distinct year) as num_champs
+  from champions
+  group by driverid
+)
+select championsCount.driverid, forename, surname, num_champs
+from championsCount join drivers
+on championsCount.driverid = drivers.driverid
+order by num_champs desc, forename, surname desc, driverid
+limit 5;
