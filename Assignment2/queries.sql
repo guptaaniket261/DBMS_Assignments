@@ -1,0 +1,113 @@
+--1--
+-- with zero_hopes as
+-- (
+--   select destination_station_name from train_info
+--   where train_no = 97131 and source_station_name = 'KURLA'
+-- ),
+-- one_hopes as
+-- (
+--   select train_info.destination_station_name from train_info join zero_hopes
+--   on zero_hopes.destination_station_name = train_info.source_station_name
+-- ),
+-- two_hopes as
+-- (
+--   select train_info.destination_station_name from train_info join one_hopes
+--   on one_hopes.destination_station_name = train_info.source_station_name
+-- )
+-- select destination_station_name from zero_hopes
+-- union
+-- (
+--   select destination_station_name from one_hopes
+--   union select destination_station_name from two_hopes
+-- )
+-- order by destination_station_name;
+
+--2--
+-- with zero_hopes as
+-- (
+--   select destination_station_name, day_of_arrival as r_day from train_info
+--   where train_no = 97131 and source_station_name = 'KURLA' and 
+--   day_of_departure = day_of_arrival
+-- ),
+-- one_hopes as
+-- (
+--   select train_info.destination_station_name, r_day from train_info join zero_hopes
+--   on zero_hopes.destination_station_name = train_info.source_station_name
+--   and train_info.day_of_departure = train_info.day_of_arrival
+--   and zero_hopes.r_day = train_info.day_of_departure
+-- ),
+-- two_hopes as
+-- (
+--   select train_info.destination_station_name, r_day from train_info join one_hopes
+--   on one_hopes.destination_station_name = train_info.source_station_name
+--   and train_info.day_of_departure = train_info.day_of_arrival
+--   and one_hopes.r_day = train_info.day_of_departure
+-- )
+-- select destination_station_name from zero_hopes
+-- union
+-- (
+--   select destination_station_name from one_hopes
+--   union select destination_station_name from two_hopes
+-- )
+-- order by destination_station_name;
+
+--3--
+-- with zero_hopes as
+-- (
+--   select destination_station_name, day_of_arrival as r_day, distance from train_info
+--   where source_station_name = 'DADAR' and 
+--   day_of_departure = day_of_arrival
+-- ),
+-- one_hopes as
+-- (
+--   select train_info.destination_station_name, r_day, zero_hopes.distance + train_info.distance as distance from train_info join zero_hopes
+--   on zero_hopes.destination_station_name = train_info.source_station_name
+--   and train_info.day_of_departure = train_info.day_of_arrival
+--   and zero_hopes.r_day = train_info.day_of_departure
+-- ),
+-- two_hopes as
+-- (
+--   select train_info.destination_station_name, r_day, one_hopes.distance + train_info.distance as distance from train_info join one_hopes
+--   on one_hopes.destination_station_name = train_info.source_station_name
+--   and train_info.day_of_departure = train_info.day_of_arrival
+--   and one_hopes.r_day = train_info.day_of_departure
+-- )
+-- select destination_station_name, distance, r_day as day from zero_hopes
+-- union all
+-- (
+--   select destination_station_name, distance, r_day as day from one_hopes
+--   union all select destination_station_name, distance, r_day as day from two_hopes
+-- )
+-- order by destination_station_name, distance, day;
+
+--4--
+
+
+--5--
+-- with zero_hopes as
+-- (
+--   select destination_station_name from train_info
+--   where source_station_name = 'CST-MUMBAI'
+-- ),
+-- one_hopes as
+-- (
+--   select train_info.destination_station_name from train_info join zero_hopes
+--   on zero_hopes.destination_station_name = train_info.source_station_name
+-- ),
+-- two_hopes as
+-- (
+--   select train_info.destination_station_name from train_info join one_hopes
+--   on one_hopes.destination_station_name = train_info.source_station_name
+-- )
+-- select count(destination_station_name) as count from (
+--   select destination_station_name from zero_hopes where destination_station_name = 'VASHI'
+--   union all
+--   select destination_station_name from one_hopes where destination_station_name = 'VASHI'
+--   union all 
+--   select destination_station_name from two_hopes where destination_station_name = 'VASHI'
+-- ) as t;
+
+--6--
+
+
+
