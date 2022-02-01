@@ -9,3 +9,8 @@ Leicester
         \
         (matches in 2016 with hometeam in set X without removing duplicates)
 
+
+
+select five_trains.source_station_name, one_train.destination_station_name, five_trains.distance + one_train.distance as distance, five_trains.path || one_train.destination_station_name as path
+  from five_trains, one_train
+  where five_trains.destination_station_name = one_train.source_station_name and one_train.destination_station_name not in five_trains.path
