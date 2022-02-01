@@ -1,0 +1,11 @@
+14 -  Suppose hometeam A has played in common against hometeam Leicester (say B). So both A and B have played with a common team (say C). Suppose A also played with team D, where B has never played with D. So, do we have to include match (A, D) as well if homegoal - awaygoal > 3. Or do we need to account for only those matches in which the awayteam has played against both A and B.
+yes, as we will be considering all the matches with hometeam A
+@36_f3
+Leicester
+        \
+          Y
+        /
+   Set X
+        \
+        (matches in 2016 with hometeam in set X without removing duplicates)
+

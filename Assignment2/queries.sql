@@ -23,33 +23,33 @@
 -- order by destination_station_name;
 
 --2--
-with zero_hopes as
-(
-  select destination_station_name, day_of_arrival as r_day from train_info
-  where train_no = 97131 and source_station_name = 'KURLA' and 
-  day_of_departure = day_of_arrival
-),
-one_hopes as
-(
-  select train_info.destination_station_name, r_day from train_info join zero_hopes
-  on zero_hopes.destination_station_name = train_info.source_station_name
-  and train_info.day_of_departure = train_info.day_of_arrival
-  and zero_hopes.r_day = train_info.day_of_departure
-),
-two_hopes as
-(
-  select train_info.destination_station_name, r_day from train_info join one_hopes
-  on one_hopes.destination_station_name = train_info.source_station_name
-  and train_info.day_of_departure = train_info.day_of_arrival
-  and one_hopes.r_day = train_info.day_of_departure
-)
-select destination_station_name from zero_hopes
-union
-(
-  select destination_station_name from one_hopes
-  union select destination_station_name from two_hopes
-)
-order by destination_station_name;
+-- with zero_hopes as
+-- (
+--   select destination_station_name, day_of_arrival as r_day from train_info
+--   where train_no = 97131 and source_station_name = 'KURLA' and 
+--   day_of_departure = day_of_arrival
+-- ),
+-- one_hopes as
+-- (
+--   select train_info.destination_station_name, r_day from train_info join zero_hopes
+--   on zero_hopes.destination_station_name = train_info.source_station_name
+--   and train_info.day_of_departure = train_info.day_of_arrival
+--   and zero_hopes.r_day = train_info.day_of_departure
+-- ),
+-- two_hopes as
+-- (
+--   select train_info.destination_station_name, r_day from train_info join one_hopes
+--   on one_hopes.destination_station_name = train_info.source_station_name
+--   and train_info.day_of_departure = train_info.day_of_arrival
+--   and one_hopes.r_day = train_info.day_of_departure
+-- )
+-- select destination_station_name from zero_hopes
+-- union
+-- (
+--   select destination_station_name from one_hopes
+--   union select destination_station_name from two_hopes
+-- )
+-- order by destination_station_name;
 
 --3--
 -- with zero_hopes as
@@ -286,3 +286,82 @@ order by destination_station_name;
 
 --10--
 
+--11--
+
+
+
+
+
+--12--
+-- with opponents as
+-- (
+--   select distinct awayteamid from games
+--   where hometeamid = (select teamid from teams where name = 'Arsenal')
+-- ),
+-- common_against as
+-- (
+--   select distinct hometeamid from games where 
+--   awayteamid in (select awayteamid from opponents) and not(hometeamid = (select teamid from teams where name = 'Arsenal'))
+-- )
+-- select distinct name as teamnames from teams where teams.teamid in (select hometeamid from common_against)
+-- order by teamnames;
+
+
+
+--13--
+-- with teamgoals(id, goals) as
+-- (
+--   select hometeamid, homegoals from games
+--   union all
+--   select awayteamid, awaygoals from games
+-- ),
+-- totTeamsGoals as
+-- (
+--   select id as teamid, sum(goals) as goals from teamgoals group by teamid
+-- ),
+-- opponents as
+-- (
+--   select distinct awayteamid from games
+--   where hometeamid = (select teamid from teams where name = 'Arsenal')
+-- ),
+-- common_against as
+-- (
+--   select hometeamid, year from games where 
+--   awayteamid in (select awayteamid from opponents) and not(hometeamid = (select teamid from teams where name = 'Arsenal'))
+-- ),
+-- first_common_against as
+-- (
+--   select hometeamid, min(year) as year from common_against group by hometeamid
+-- ),
+-- first_common_against_name as
+-- (
+--   select hometeamid, name, year from first_common_against join teams
+--   on hometeamid = teamid
+-- )
+-- select name as teamnames, goals, year from first_common_against_name
+-- join totTeamsGoals on hometeamid = totTeamsGoals.teamid
+-- order by goals desc, year asc
+-- limit 5;
+
+
+
+--14--
+-- with opponents as
+-- (
+--   select distinct awayteamid from games
+--   where hometeamid = (select teamid from teams where name = 'Leicester') 
+-- ),
+-- common_against as
+-- (
+--   select distinct hometeamid from games where 
+--   awayteamid in (select awayteamid from opponents) and not(hometeamid = (select teamid from teams where name = 'Leicester'))
+-- ),
+-- matches2015 as
+-- (
+--   select hometeamid, homegoals - awaygoals as goals from games
+--   where year = 2015 and hometeamid in (select hometeamid from common_against) and homegoals - awaygoals > 3
+-- )
+-- select name as teamnames, goals from matches2015 join teams on teams.teamid = matches2015.hometeamid
+-- order by goals desc, teamnames;
+
+--15--
